@@ -5,7 +5,8 @@
         "type": "TridentNotebook",
         "typeProperties": {
           "notebookId": "9ab500a1-ed44-b475-43bf-7ee42d8a86d4",
-          "workspaceId": "00000000-0000-0000-0000-000000000000"
+          "workspaceId": "00000000-0000-0000-0000-000000000000",
+          "sessionTag": "Concurrency_1"
         },
         "policy": {
           "timeout": "0.12:00:00",
@@ -22,7 +23,8 @@
         "type": "TridentNotebook",
         "typeProperties": {
           "notebookId": "5f128aef-27b4-b3cd-410d-9fbd90079c9b",
-          "workspaceId": "00000000-0000-0000-0000-000000000000"
+          "workspaceId": "00000000-0000-0000-0000-000000000000",
+          "sessionTag": "Concurrency_1"
         },
         "policy": {
           "timeout": "0.12:00:00",
@@ -46,7 +48,8 @@
         "type": "TridentNotebook",
         "typeProperties": {
           "notebookId": "d6bc9625-2d3b-ba34-4a13-f697fb1975ff",
-          "workspaceId": "00000000-0000-0000-0000-000000000000"
+          "workspaceId": "00000000-0000-0000-0000-000000000000",
+          "sessionTag": "Concurrency_1"
         },
         "policy": {
           "timeout": "0.12:00:00",
@@ -70,7 +73,8 @@
         "type": "TridentNotebook",
         "typeProperties": {
           "notebookId": "729e67da-9128-9d79-4f62-f5c852ece304",
-          "workspaceId": "00000000-0000-0000-0000-000000000000"
+          "workspaceId": "00000000-0000-0000-0000-000000000000",
+          "sessionTag": "Concurrency_1"
         },
         "policy": {
           "timeout": "0.12:00:00",
@@ -81,6 +85,34 @@
         },
         "name": "GoldTable_and_Relationship_build",
         "description": "Build Member360 Gold views and relationship mappings by integrating Silver tables into a unified analytical model for downstream reporting and business intelligence.",
+        "dependsOn": [
+          {
+            "activity": "silverTables_Testing",
+            "dependencyConditions": [
+              "Succeeded"
+            ]
+          }
+        ]
+      },
+      {
+        "type": "Office365Email",
+        "typeProperties": {
+          "body": "<p><strong>Dear recepient,</strong></p>\n<p>The pipeline name : @{pipeline().PipelineName} Has completed it silver notebook transformation with pipeline run ID : @{pipeline().RunId}. and the unit testing report has been generated on silver tables.</p>\n<p><strong>Report: </strong><br>\n@{activity('silverTables_Testing').output.result.exitValue}</p>\n<p><br></p>\n<p>Thank you</p>\n<p>Kind Regards</p>\n<p>Dev Team</p>\n<p></p>",
+          "to": "faizanscf@gmail.com",
+          "subject": "Unit Test Report"
+        },
+        "externalReferences": {
+          "connection": "3a28ffc4-2db5-4f65-b8dc-b3ca771d4913"
+        },
+        "policy": {
+          "timeout": "0.12:00:00",
+          "retry": 0,
+          "retryIntervalInSeconds": 30,
+          "secureInput": false,
+          "secureOutput": false
+        },
+        "name": "EmailReport",
+        "description": "emails the unit testing report",
         "dependsOn": [
           {
             "activity": "silverTables_Testing",
