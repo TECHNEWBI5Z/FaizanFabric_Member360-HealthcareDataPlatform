@@ -22,178 +22,116 @@
 
 # MARKDOWN ********************
 
-# **Import Libraries**
+# **UnitTesting Frame work**
 
 # CELL ********************
 
+import unittest
 from pyspark.sql import functions as F
 
-# METADATA ********************
+class TestHealthcareDataQuality(unittest.TestCase):
 
-# META {
-# META   "language": "python",
-# META   "language_group": "synapse_pyspark"
-# META }
+    @classmethod
+    def setUpClass(cls):
+        cls.patient = spark.table("silver_patient")
+        cls.observation = spark.table("silver_observation")
+        cls.condition = spark.table("silver_condition")
 
-# MARKDOWN ********************
+    # ---------------------------------------------------
+    # Test 1 : Duplicate PatientID
+    # ---------------------------------------------------
+    def test_duplicate_patient(self):
 
-# **Record Count Validation**
+        duplicate_count = (
+            self.patient
+            .groupBy("PatientID")
+            .count()
+            .filter("count > 1")
+            .count()
+        )
 
-# CELL ********************
+        self.assertEqual(
+            duplicate_count,
+            0,
+            f"Found {duplicate_count} duplicate PatientIDs"
+        )
 
-def count_table(table_name):
+    # ---------------------------------------------------
+    # Test 2 : Mandatory Fields
+    # ---------------------------------------------------
+    def test_patient_mandatory_fields(self):
 
-    count = (
-        spark.table(table_name)
-        .count()
-    )
+        missing = (
+            self.patient
+            .filter("""
+                PatientID IS NULL
+                OR Gender IS NULL
+                OR BirthDate IS NULL
+            """)
+            .count()
+        )
 
-    print(
-        f"{table_name}: {count}"
-    )
+        self.assertEqual(
+            missing,
+            0,
+            f"{missing} records have mandatory fields missing"
+        )
 
-    return count
+    # ---------------------------------------------------
+    # Test 3 : Observation Referential Integrity
+    # ---------------------------------------------------
+    def test_observation_patient_reference(self):
 
-# METADATA ********************
+        invalid = (
+            self.observation.alias("obs")
+            .join(
+                self.patient.alias("pat"),
+                F.col("obs.PatientID") == F.col("pat.PatientID"),
+                "left"
+            )
+            .filter(F.col("pat.PatientID").isNull())
+            .count()
+        )
 
-# META {
-# META   "language": "python",
-# META   "language_group": "synapse_pyspark"
-# META }
+        self.assertEqual(
+            invalid,
+            0,
+            f"{invalid} observations reference invalid patients"
+        )
 
-# CELL ********************
+    # ---------------------------------------------------
+    # Test 4 : Condition Referential Integrity
+    # ---------------------------------------------------
+    def test_condition_patient_reference(self):
 
-tables = [
-    "bronze_patient",
-    "silver_patient",
-    "bronze_observation",
-    "silver_observation",
-    "bronze_condition",
-    "silver_condition"
-]
+        invalid = (
+            self.condition.alias("con")
+            .join(
+                self.patient.alias("pat"),
+                F.col("con.PatientID") == F.col("pat.PatientID"),
+                "left"
+            )
+            .filter(F.col("pat.PatientID").isNull())
+            .count()
+        )
 
-
-for table in tables:
-    count_table(table)
-
-# METADATA ********************
-
-# META {
-# META   "language": "python",
-# META   "language_group": "synapse_pyspark"
-# META }
-
-# MARKDOWN ********************
-
-# **Patient Duplicate Check**
-
-# CELL ********************
-
-patient_duplicate = (
-    spark.table(
-        "silver_patient"
-    )
-    .groupBy(
-        "PatientID"
-    )
-    .count()
-    .filter(
-        "count > 1"
-    )
-)
-
-display(patient_duplicate)
-
-# METADATA ********************
-
-# META {
-# META   "language": "python",
-# META   "language_group": "synapse_pyspark"
-# META }
-
-# MARKDOWN ********************
-
-# **Patient Mandatory Field Check**
-
-# CELL ********************
-
-missing_patient = (
-spark.table(
-    "silver_patient"
-)
-.filter(
-    """
-    PatientID IS NULL
-    OR Gender IS NULL
-    OR BirthDate IS NULL
-    """
-)
-)
-
-display(missing_patient)
-
-# METADATA ********************
-
-# META {
-# META   "language": "python",
-# META   "language_group": "synapse_pyspark"
-# META }
-
-# MARKDOWN ********************
-
-# **Referential Integrity Check**
-
-# CELL ********************
-
-observation_patient_check = (
-
-spark.table(
-    "silver_observation"
-)
-
-.alias("obs")
-
-.join(
-
-    spark.table(
-        "silver_patient"
-    )
-
-    .alias("pat"),
-
-    F.col(
-        "obs.PatientID"
-    )
-    ==
-    F.col(
-        "pat.PatientID"
-    ),
-
-    "left"
-
-)
-
-.filter(
-
-    F.col(
-        "pat.PatientID"
-    ).isNull()
-
-)
-
-.select(
-
-    "obs.ObservationID",
-    "obs.PatientID"
-
-)
-
-)
+        self.assertEqual(
+            invalid,
+            0,
+            f"{invalid} conditions reference invalid patients"
+        )
 
 
-display(
-    observation_patient_check
-)
+# Execute tests
+suite = unittest.TestLoader().loadTestsFromTestCase(TestHealthcareDataQuality)
+runner = unittest.TextTestRunner(verbosity=2)
+result = runner.run(suite)
+
+# Fail notebook if any test failed
+if not result.wasSuccessful():
+    raise Exception("Data Quality Unit Tests Failed")
+
+print("All Data Quality Unit Tests Passed.")
 
 # METADATA ********************
 
@@ -202,48 +140,43 @@ display(
 # META   "language_group": "synapse_pyspark"
 # META }
 
-# MARKDOWN ********************
+# CELL ********************
 
-# **Create Data Quality Summary Table**
+# Run tests
+suite = unittest.TestLoader().loadTestsFromTestCase(TestHealthcareDataQuality)
+runner = unittest.TextTestRunner(verbosity=2)
+
+result = runner.run(suite)
+
+# Capture summary
+total_tests = result.testsRun
+failures = len(result.failures)
+errors = len(result.errors)
+passed = total_tests - failures - errors
+
+test_summary = {
+    "TotalTests": total_tests,
+    "Passed": passed,
+    "Failures": failures,
+    "Errors": errors,
+    "Status": "PASS" if result.wasSuccessful() else "FAIL"
+}
+
+print(test_summary)
+
+# METADATA ********************
+
+# META {
+# META   "language": "python",
+# META   "language_group": "synapse_pyspark"
+# META }
 
 # CELL ********************
 
-dq_results = [
+import json
+from notebookutils import mssparkutils
 
-("silver_patient",
- "Duplicate PatientID",
- "PASS"),
-
-("silver_observation",
- "Invalid Patient Reference",
- "PASS"),
-
-("silver_condition",
- "Invalid Patient Reference",
- "PASS")
-
-]
-
-
-dq_df = spark.createDataFrame(
-    dq_results,
-    [
-        "TableName",
-        "CheckName",
-        "Result"
-    ]
-)
-
-
-(
-dq_df
-.write
-.format("delta")
-.mode("overwrite")
-.saveAsTable(
-    "silver_data_quality_results"
-)
-)
+mssparkutils.notebook.exit(json.dumps(test_summary))
 
 # METADATA ********************
 
