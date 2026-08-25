@@ -4,8 +4,8 @@
       {
         "type": "TridentNotebook",
         "typeProperties": {
-          "notebookId": "2d8a86d4-7ee4-43bf-b475-ed449ab500a1",
-          "workspaceId": "2b558bb6-aefb-4342-a27b-56457f13dfc0",
+          "notebookId": "9ab500a1-ed44-b475-43bf-7ee42d8a86d4",
+          "workspaceId": "00000000-0000-0000-0000-000000000000",
           "sessionTag": "Concurrency_1"
         },
         "policy": {
@@ -17,8 +17,6 @@
         },
         "name": "Bronze_injestion",
         "description": "Ingest raw FHIR resources from the source into the Bronze Lakehouse while preserving the original data for auditing and replay.",
-        "state": "Inactive",
-        "onInactiveMarkAs": "Succeeded",
         "dependsOn": []
       },
       {
