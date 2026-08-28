@@ -1,0 +1,11 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/gitIntegration/platformProperties/2.0.0/schema.json",
+  "metadata": {
+    "type": "Notebook",
+    "displayName": "sample_python_function"
+  },
+  "config": {
+    "version": "2.0",
+    "logicalId": "d47a1b3e-8f9c-4a2b-9c1d-2e3f4a5b6c7d"
+  }
+}
