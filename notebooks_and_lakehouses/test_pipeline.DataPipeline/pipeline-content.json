@@ -1,0 +1,44 @@
+{
+  "properties": {
+    "description": "Simple Copy activity pipeline that reads from a source folder and writes to a destination folder in the HealthcareLakehouse.",
+    "activities": [
+      {
+        "name": "CopyFromSourceToDest",
+        "description": "Copies all files from the source folder to the destination folder inside the HealthcareLakehouse.",
+        "type": "Copy",
+        "typeProperties": {
+          "source": {
+            "type": "Lakehouse",
+            "storeSettings": {
+              "type": "LakehouseReadSettings",
+              "recursive": true
+            }
+          },
+          "sink": {
+            "type": "Lakehouse",
+            "storeSettings": {
+              "type": "LakehouseWriteSettings"
+            }
+          },
+          "inputs": [
+            {
+              "name": "SourceFolder"
+            }
+          ],
+          "outputs": [
+            {
+              "name": "DestinationFolder"
+            }
+          ]
+        },
+        "policy": {
+          "timeout": "0.12:00:00",
+          "retry": 3,
+          "retryIntervalInSeconds": 60,
+          "secureInput": false,
+          "secureOutput": false
+        }
+      }
+    ]
+  }
+}

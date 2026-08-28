@@ -1,0 +1,12 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/gitIntegration/platformProperties/2.0.0/schema.json",
+  "metadata": {
+    "type": "DataPipeline",
+    "displayName": "test_pipeline",
+    "description": "Simple Copy activity pipeline that reads from a source folder and writes to a destination folder in the HealthcareLakehouse."
+  },
+  "config": {
+    "version": "2.0",
+    "logicalId": "f93cdf0d-0f53-40eb-98e3-ec3e7fc1e904"
+  }
+}
