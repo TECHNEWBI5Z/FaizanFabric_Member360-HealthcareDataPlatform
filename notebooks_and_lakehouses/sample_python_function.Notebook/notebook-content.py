@@ -11,15 +11,13 @@
 # MARKDOWN ********************
 
 # # Sample Python Functions Notebook
-
 # This notebook contains implementations of key algorithmic functions:
-
 # 1. **Palindrome Checker** - Determines if a string is a palindrome
 # 2. **Longest Palindromic Substring** - Finds the longest palindrome in a string
 # 3. **Longest Consecutive Sequence** - Finds the length of longest consecutive sequence in O(n) time
 # 4. **Unit Tests** - Comprehensive test suite with edge cases
-
 # All functions include proper error handling and have been tested with various edge cases.
+
 
 # MARKDOWN ********************
 
